@@ -11,7 +11,7 @@ class AudioData:
         self.__data = BytesIO(data)
 
     def recognize(self) -> str:
-        result: str = 'hano world'
+        result: str = services.recognition.recognize(self.__data)
         return result
 
 
