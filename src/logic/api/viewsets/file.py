@@ -4,13 +4,19 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework import viewsets, status, mixins
 from rest_framework.serializers import BaseSerializer
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 from logic.api.serializers.file import FileSerializer
+from logic.api.serializers.text import TextSerializer
 from logic.models import AudioData, BytesIO
 
 
 class FileViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
     serializer_class: typing.Type[FileSerializer] = FileSerializer
 
+    @extend_schema(
+        request=FileSerializer,
+        responses={201: TextSerializer},
+    )
     def create(self, request, *args, **kwargs) -> Response:
         post: BaseSerializer = self.get_serializer(data=request.data)
         post.is_valid(raise_exception=True)
@@ -25,10 +31,14 @@ class FileViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
 
         audio_data: AudioData = AudioData(bytes_)
 
-        data: dict = {'status': audio_data.recognize()}
+        response_data: TextSerializer = TextSerializer(
+            data={'text': audio_data.recognize()}
+        )
+
+        response_data.is_valid()
 
         response: Response = Response(
-            data=data,
+            data=response_data.validated_data,
             status=status.HTTP_201_CREATED,
             headers=headers
         )
