@@ -16,10 +16,30 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
 from logic.api.urls import urlpatterns
+from drf_spectacular.views import (
+    SpectacularAPIView as OpenAPI,
+    SpectacularRedocView as Redoc,
+    SpectacularSwaggerView as Swagger
+)
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path(r'api/v1/', include((urlpatterns, 'logic'), namespace='v1')),
+    path('api/v1/', include((urlpatterns, 'logic'), namespace='v1')),
+    path(
+        'api/v1/schema/',
+        OpenAPI.as_view(api_version='v1'),
+        name='schema'
+    ),
+    path(
+        'api/v1/schema/swagger/',
+        Swagger.as_view(url_name='schema'),
+        name='swagger-ui'
+    ),
+    path(
+        'api/v1/schema/redoc/',
+        Redoc.as_view(url_name='schema'),
+        name='redoc'
+    ),
 ]
