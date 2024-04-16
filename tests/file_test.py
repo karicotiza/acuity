@@ -135,12 +135,25 @@ def test_post_201_wav() -> None:
     assert data.get('text', '') == 'hano world'
 
 
-def test_post_400() -> None:
+def test_post_400_no_file_was_submitted() -> None:
     response: requests.Response = requests.post(URL, files=WRONG_PAYLOAD)
     data: dict = response.json()
 
     assert response.status_code == 400
     assert data == {'file': ['No file was submitted.']}
+
+
+def test_post_400_not_an_audio_file() -> None:
+    file: pathlib.Path = pathlib.Path(
+        'tests', 'data', 'base64', 'base64_wav.txt'
+    )
+
+    payload_: dict = {'file': open(file, 'rb')}
+    response: requests.Response = requests.post(URL, files=payload_)
+    data: dict = response.json()
+
+    assert response.status_code == 400
+    assert data == {'file': ['Not an audio file.']}
 
 
 def test_put_405() -> None:
