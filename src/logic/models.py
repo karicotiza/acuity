@@ -69,6 +69,10 @@ class AudioData:
 
     def __init__(self, data: bytes) -> None:
         self.__data = BytesIO(data)
+        self.__convert()
+
+    def __convert(self) -> None:
+        self.__data = services.converter.convert(self.__data)
 
     def recognize(self) -> str:
         result: str = services.recognition.recognize(self.__data)
