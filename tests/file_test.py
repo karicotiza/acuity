@@ -3,8 +3,6 @@ import pathlib
 
 
 URL: str = 'http://localhost:8000/api/v1/file/'
-FILE: pathlib.Path = pathlib.Path('tests', 'audio.wav')
-PAYLOAD: dict = {'file': open(FILE, 'rb')}
 TEXT: str = 'hano world'
 OPTIONS: dict = {
     "name": "File List",
@@ -29,8 +27,18 @@ OPTIONS: dict = {
         }
     }
 }
-WRONG_FILE: pathlib.Path = pathlib.Path('tests', 'base64.txt')
+WRONG_FILE: pathlib.Path = pathlib.Path(
+    'tests', 'data', 'base64', 'base64_wav.txt'
+)
+
 WRONG_PAYLOAD: dict = {'base64': open(WRONG_FILE, 'r', encoding='utf-8')}
+
+
+def payload(name: str):
+    file: pathlib.Path = pathlib.Path('tests', 'data', 'audio', name)
+    payload: dict = {'file': open(file, 'rb')}
+
+    return payload
 
 
 def test_get_405() -> None:
@@ -47,8 +55,80 @@ def test_head_405() -> None:
     assert response.status_code == 405
 
 
-def test_post_201() -> None:
-    response: requests.Response = requests.post(URL, files=PAYLOAD)
+def test_post_201_aac() -> None:
+    response: requests.Response = requests.post(
+        URL, files=payload('audio.aac')
+    )
+    data: dict = response.json()
+
+    assert response.status_code == 201
+    assert data.get('text', '') == 'hano world'
+
+
+def test_post_201_aiff() -> None:
+    response: requests.Response = requests.post(
+        URL, files=payload('audio.aiff')
+    )
+    data: dict = response.json()
+
+    assert response.status_code == 201
+    assert data.get('text', '') == 'hano world'
+
+
+def test_post_201_flac() -> None:
+    response: requests.Response = requests.post(
+        URL, files=payload('audio.flac')
+    )
+    data: dict = response.json()
+
+    assert response.status_code == 201
+    assert data.get('text', '') == 'hano world'
+
+
+def test_post_201_m4a() -> None:
+    response: requests.Response = requests.post(
+        URL, files=payload('audio.m4a')
+    )
+    data: dict = response.json()
+
+    assert response.status_code == 201
+    assert data.get('text', '') == 'hano world'
+
+
+def test_post_201_mp3() -> None:
+    response: requests.Response = requests.post(
+        URL, files=payload('audio.mp3')
+    )
+    data: dict = response.json()
+
+    assert response.status_code == 201
+    assert data.get('text', '') == 'hano world'
+
+
+def test_post_201_ogg() -> None:
+    response: requests.Response = requests.post(
+        URL, files=payload('audio.ogg')
+    )
+    data: dict = response.json()
+
+    assert response.status_code == 201
+    assert data.get('text', '') == 'hano world'
+
+
+def test_post_201_opus() -> None:
+    response: requests.Response = requests.post(
+        URL, files=payload('audio.opus')
+    )
+    data: dict = response.json()
+
+    assert response.status_code == 201
+    assert data.get('text', '') == 'hano world'
+
+
+def test_post_201_wav() -> None:
+    response: requests.Response = requests.post(
+        URL, files=payload('audio.wav')
+    )
     data: dict = response.json()
 
     assert response.status_code == 201
