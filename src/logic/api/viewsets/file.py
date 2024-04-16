@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 from logic.api.serializers.file import FileSerializer
 from logic.api.serializers.text import TextSerializer
-from logic.models import AudioData, BytesIO
+from logic.models import AudioData, BytesIO, Logs, IP, Hash
 
 
 class FileViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
@@ -31,8 +31,14 @@ class FileViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
 
         audio_data: AudioData = AudioData(bytes_)
 
+        text = audio_data.recognize()
+        ip: IP = IP(request)
+        sha: Hash = Hash(text)
+        logs: Logs = Logs(ip=ip.value, hash=sha.value)
+        logs.save()
+
         response_data: TextSerializer = TextSerializer(
-            data={'text': audio_data.recognize()}
+            data={'text': text}
         )
 
         response_data.is_valid()
