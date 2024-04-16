@@ -9,6 +9,9 @@ drf_spectacular[sidecar]==0.27.2
 # PostgreSQL
 psycopg2==2.9.9
 
+# Audio converion
+pydub==0.25.1
+
 # Recognition
 transformers==4.39.3
 torch==2.2.2
