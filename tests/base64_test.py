@@ -132,12 +132,39 @@ def test_post_201_wav() -> None:
     assert data.get('text', '') == 'hano world'
 
 
-def test_post_400() -> None:
+def test_post_400_missing_field() -> None:
     response: requests.Response = requests.post(URL, files=WRONG_PAYLOAD)
     data: dict = response.json()
 
     assert response.status_code == 400
     assert data == {'base64': ['This field is required.']}
+
+
+def test_post_400_malformed_data() -> None:
+    file: pathlib.Path = pathlib.Path(
+        'tests', 'data', 'base64', 'base64_wav.txt'
+    )
+
+    payload_: dict = {
+        'base64': str(open(file, 'r', encoding='utf-8')) + 'a'
+    }
+
+    response: requests.Response = requests.post(URL, payload_)
+    data: dict = response.json()
+
+    assert response.status_code == 400
+    assert data == {'base64': ['Malformed base64 data.']}
+
+
+def test_post_400_not_an_audio() -> None:
+    file: pathlib.Path = pathlib.Path('tests', 'data', 'base64', 'image.txt')
+    payload_: dict = {'base64': open(file, 'r', encoding='utf-8')}
+
+    response: requests.Response = requests.post(URL, payload_)
+    data: dict = response.json()
+
+    assert response.status_code == 400
+    assert data == {'base64': ['Not an audio.']}
 
 
 def test_put_405() -> None:
