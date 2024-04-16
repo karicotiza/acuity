@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 from logic.api.serializers.base64 import Base64Serializer
 from logic.api.serializers.text import TextSerializer
-from logic.models import AudioData, Base64
+from logic.models import AudioData, Base64, Logs, IP, Hash
 
 
 class Base64ViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
@@ -25,8 +25,14 @@ class Base64ViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
         base64_: Base64 = Base64(base64)
         audio_data: AudioData = AudioData(base64_.to_bytes())
 
+        text = audio_data.recognize()
+        ip: IP = IP(request)
+        sha: Hash = Hash(text)
+        logs: Logs = Logs(ip=ip.value, hash=sha.value)
+        logs.save()
+
         response_data: TextSerializer = TextSerializer(
-            data={'text': audio_data.recognize()}
+            data={'text': text}
         )
 
         response_data.is_valid()
