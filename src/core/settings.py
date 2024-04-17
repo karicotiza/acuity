@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'drf_spectacular_sidecar',
     'rest_framework',
+    'celery',
     'logic',
 ]
 
@@ -101,6 +102,11 @@ CACHES = {
         'TIMEOUT': int(environ.get('REDIS_TIMEOUT', '5')),
     }
 }
+
+CELERY_BROKER_URL = environ.get(
+    'RABBITMQ_ADDRESS',
+    'amqp://root:admin@localhost:5672/logic'
+)
 
 
 # Password validation

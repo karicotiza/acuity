@@ -26,3 +26,16 @@ services:
       retries: 5
     ports:
       - "6379:6379"
+
+  rabbitmq:
+    container_name: acuity_test_environment_rabbitmq
+    image: rabbitmq:3.13.1-management
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+    ports:
+      - "15672:15672"
+      - "5672:5672"
