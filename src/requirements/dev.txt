@@ -17,6 +17,9 @@ psycopg2==2.9.9
 # Audio converion
 pydub==0.25.1
 
+# Caching
+redis==5.0.3
+
 # Tests
 pytest==8.1.1
 requests==2.31.0

@@ -1,6 +1,9 @@
 import requests
 import pathlib
 
+from datetime import datetime
+from time import sleep
+
 
 URL: str = 'http://localhost:8000/api/v1/base64/'
 TEXT: str = 'hano world'
@@ -50,6 +53,22 @@ def test_head_405() -> None:
     response: requests.Response = requests.head(URL)
 
     assert response.status_code == 405
+
+
+def test_post_caching() -> None:
+    sleep(5)
+
+    uncached_start: datetime = datetime.now()
+    requests.post(URL, payload('base64_wav.txt'))
+    uncached_end: datetime = datetime.now()
+    uncached_time: int = (uncached_end - uncached_start).microseconds
+
+    cached_start: datetime = datetime.now()
+    requests.post(URL, payload('base64_wav.txt'))
+    cached_end: datetime = datetime.now()
+    cached_time: int = (cached_end - cached_start).microseconds
+
+    assert cached_time < (uncached_time * 0.65)
 
 
 def test_post_201_aac() -> None:

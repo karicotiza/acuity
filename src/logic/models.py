@@ -69,14 +69,23 @@ class AudioData:
 
     def __init__(self, data: bytes) -> None:
         self.__data = BytesIO(data)
-        self.__convert()
-
-    def __convert(self) -> None:
-        self.__data = services.converter.convert(self.__data)
 
     def recognize(self) -> str:
-        result: str = services.recognition.recognize(self.__data)
-        return result
+        sha = sha256(self.__data.read())
+        hexdigest: str = sha.hexdigest()
+        self.__data.seek(0)
+
+        cached_result: str = services.cache.get(hexdigest)
+
+        if cached_result:
+            return cached_result
+
+        else:
+            self.__data = services.converter.convert(self.__data)
+            result: str = services.recognition.recognize(self.__data)
+            services.cache.set(hexdigest, result)
+
+            return result
 
 
 class Base64:
