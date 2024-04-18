@@ -1,13 +1,16 @@
 import typing
 
+from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.urls import reverse
 from rest_framework import viewsets, status, mixins
 from rest_framework.serializers import BaseSerializer
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 from logic.api.serializers.file import FileSerializer
-from logic.api.serializers.text import TextSerializer
-from logic.models import AudioData, BytesIO, Logs, IP, Hash
+from logic.api.serializers.link import LinkSerializer
+from logic.models import IP, BytesHexdigest
+from logic.tasks import start_recognition
 
 
 class FileViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
@@ -15,7 +18,7 @@ class FileViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
 
     @extend_schema(
         request=FileSerializer,
-        responses={201: TextSerializer},
+        responses={201: LinkSerializer},
     )
     def create(self, request, *args, **kwargs) -> Response:
         post: BaseSerializer = self.get_serializer(data=request.data)
@@ -28,17 +31,19 @@ class FileViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
 
         if isinstance(bytes_io, BytesIO):
             bytes_: bytes = bytes_io.read()
+            bytes_io.seek(0)
 
-        audio_data: AudioData = AudioData(bytes_)
-
-        text = audio_data.recognize()
+        audio_bytes_hexdigest: BytesHexdigest = BytesHexdigest(bytes_)
         ip: IP = IP(request)
-        sha: Hash = Hash(text)
-        logs: Logs = Logs(ip=ip.value, hash=sha.value)
-        logs.save()
 
-        response_data: TextSerializer = TextSerializer(
-            data={'text': text}
+        start_recognition.delay(bytes_, audio_bytes_hexdigest.value, ip.value)
+
+        link: str = self.__generate_text_link(
+            request, audio_bytes_hexdigest.value
+        )
+
+        response_data: LinkSerializer = LinkSerializer(
+            data={'link': link}
         )
 
         response_data.is_valid()
@@ -50,3 +55,9 @@ class FileViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
         )
 
         return response
+
+    def __generate_text_link(self, request, hexdigest: str) -> str:
+        relative_link: str = reverse('logic:text-detail', args=[hexdigest])
+        absolute_link: str = request.build_absolute_uri(relative_link)
+
+        return absolute_link

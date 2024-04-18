@@ -31,18 +31,35 @@ class IP:
         return self.__ip
 
 
-class Hash:
+class StringHexdigest:
 
     def __init__(self, string: str) -> None:
         self.__string: str = string
+        self.__hexdigest: str = ''
 
     @property
     def value(self) -> str:
-        encoded: bytes = self.__string.encode()
-        sha = sha256(encoded)
-        hexdigest: str = sha.hexdigest()
+        if not self.__hexdigest:
+            encoded: bytes = self.__string.encode()
+            sha = sha256(encoded)
+            self.__hexdigest = sha.hexdigest()
 
-        return hexdigest
+        return self.__hexdigest
+
+
+class BytesHexdigest:
+
+    def __init__(self, bytes_: bytes) -> None:
+        self.__bytes: bytes = bytes_
+        self.__hexdigest: str = ''
+
+    @property
+    def value(self) -> str:
+        if not self.__hexdigest:
+            sha = sha256(self.__bytes)
+            self.__hexdigest = sha.hexdigest()
+
+        return self.__hexdigest
 
 
 class Logs(models.Model):
@@ -67,25 +84,27 @@ class Logs(models.Model):
 
 class AudioData:
 
-    def __init__(self, data: bytes) -> None:
+    def __init__(self, data: bytes, hexdigest: str) -> None:
         self.__data = BytesIO(data)
+        self.__hexdigest: str = hexdigest
+        self.__text: str = ''
 
-    def recognize(self) -> str:
-        sha = sha256(self.__data.read())
-        hexdigest: str = sha.hexdigest()
-        self.__data.seek(0)
+    @property
+    def text(self) -> str:
+        if not self.__text:
+            cached_result: str = services.cache.get(self.__hexdigest)
 
-        cached_result: str = services.cache.get(hexdigest)
+            if cached_result:
+                self.__text = cached_result
 
-        if cached_result:
-            return cached_result
+            else:
+                self.__data = services.converter.convert(self.__data)
+                result: str = services.recognition.recognize(self.__data)
+                self.__text = result
 
-        else:
-            self.__data = services.converter.convert(self.__data)
-            result: str = services.recognition.recognize(self.__data)
-            services.cache.set(hexdigest, result)
+                services.cache.set(self.__hexdigest, self.__text)
 
-            return result
+        return self.__text
 
 
 class Base64:
