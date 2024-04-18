@@ -1,7 +1,6 @@
 import requests
 import pathlib
 
-from datetime import datetime
 from time import sleep
 
 
@@ -41,6 +40,21 @@ def payload(name: str):
     return payload
 
 
+def wait(link: str) -> None:
+    while True:
+        redirect: requests.Response = requests.get(link)
+        redirect_data: dict = redirect.json()
+
+        assert redirect.status_code == 200
+
+        if redirect_data.get('ready'):
+            assert redirect_data.get('text') == TEXT
+            break
+
+        else:
+            sleep(0.2)
+
+
 def test_get_405() -> None:
     response: requests.Response = requests.get(URL)
     data: dict = response.json()
@@ -58,17 +72,23 @@ def test_head_405() -> None:
 def test_post_caching() -> None:
     sleep(5)
 
-    uncached_start: datetime = datetime.now()
-    requests.post(URL, payload('base64_wav.txt'))
-    uncached_end: datetime = datetime.now()
-    uncached_time: int = (uncached_end - uncached_start).microseconds
+    response: requests.Response = requests.post(
+        URL, payload('base64_wav.txt')
+    )
+    data: dict = response.json()
+    link: str = data.get('link', '')
+    redirect: requests.Response = requests.get(link)
 
-    cached_start: datetime = datetime.now()
-    requests.post(URL, payload('base64_wav.txt'))
-    cached_end: datetime = datetime.now()
-    cached_time: int = (cached_end - cached_start).microseconds
+    assert redirect.status_code == 200
 
-    assert cached_time < (uncached_time * 0.65)
+    sleep(2)
+
+    redirect_: requests.Response = requests.get(link)
+    redirect_data: dict = redirect_.json()
+
+    assert redirect_.status_code == 200
+    assert redirect_data.get('ready') is True
+    assert redirect_data.get('text') == TEXT
 
 
 def test_post_201_aac() -> None:
@@ -78,7 +98,10 @@ def test_post_201_aac() -> None:
     data: dict = response.json()
 
     assert response.status_code == 201
-    assert data.get('text', '') == 'hano world'
+
+    link: str = data.get('link', '')
+
+    wait(link)
 
 
 def test_post_201_aiff() -> None:
@@ -88,7 +111,10 @@ def test_post_201_aiff() -> None:
     data: dict = response.json()
 
     assert response.status_code == 201
-    assert data.get('text', '') == 'hano world'
+
+    link: str = data.get('link', '')
+
+    wait(link)
 
 
 def test_post_201_flac() -> None:
@@ -98,7 +124,10 @@ def test_post_201_flac() -> None:
     data: dict = response.json()
 
     assert response.status_code == 201
-    assert data.get('text', '') == 'hano world'
+
+    link: str = data.get('link', '')
+
+    wait(link)
 
 
 def test_post_201_m4a() -> None:
@@ -108,7 +137,10 @@ def test_post_201_m4a() -> None:
     data: dict = response.json()
 
     assert response.status_code == 201
-    assert data.get('text', '') == 'hano world'
+
+    link: str = data.get('link', '')
+
+    wait(link)
 
 
 def test_post_201_mp3() -> None:
@@ -118,7 +150,10 @@ def test_post_201_mp3() -> None:
     data: dict = response.json()
 
     assert response.status_code == 201
-    assert data.get('text', '') == 'hano world'
+
+    link: str = data.get('link', '')
+
+    wait(link)
 
 
 def test_post_201_ogg() -> None:
@@ -128,7 +163,10 @@ def test_post_201_ogg() -> None:
     data: dict = response.json()
 
     assert response.status_code == 201
-    assert data.get('text', '') == 'hano world'
+
+    link: str = data.get('link', '')
+
+    wait(link)
 
 
 def test_post_201_opus() -> None:
@@ -138,7 +176,10 @@ def test_post_201_opus() -> None:
     data: dict = response.json()
 
     assert response.status_code == 201
-    assert data.get('text', '') == 'hano world'
+
+    link: str = data.get('link', '')
+
+    wait(link)
 
 
 def test_post_201_wav() -> None:
@@ -148,7 +189,10 @@ def test_post_201_wav() -> None:
     data: dict = response.json()
 
     assert response.status_code == 201
-    assert data.get('text', '') == 'hano world'
+
+    link: str = data.get('link', '')
+
+    wait(link)
 
 
 def test_post_400_missing_field() -> None:
