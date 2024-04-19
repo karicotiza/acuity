@@ -1,5 +1,6 @@
 import typing
 
+from django.http import Http404
 from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
@@ -17,18 +18,24 @@ class TextViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
         id: str = kwargs['pk']
         audio_hexdigest = id
 
-        ready: bool = False
-        text: str = services.cache.get(audio_hexdigest)
+        started: str = services.cache.get_started(audio_hexdigest)
 
-        if text:
-            ready = True
+        if not started:
+            raise Http404()
 
-        response_data: TextSerializer = TextSerializer(
-            data={'ready': ready, 'text': text}
-        )
+        else:
+            ready: bool = False
+            text: str = services.cache.get_finished(audio_hexdigest)
 
-        response_data.is_valid()
+            if text:
+                ready = True
 
-        response: Response = Response(data=response_data.data)
+            response_data: TextSerializer = TextSerializer(
+                data={'ready': ready, 'text': text}
+            )
 
-        return response
+            response_data.is_valid(raise_exception=True)
+
+            response = Response(data=response_data.data)
+
+            return response
