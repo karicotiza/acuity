@@ -26,7 +26,7 @@ class Base64Serializer(serializers.Serializer):
             bytes_io: BytesIO = BytesIO(base64_.to_bytes())
 
             AudioSegment.from_file(bytes_io)
-        except IndexError:
+        except Exception:
             raise serializers.ValidationError('Not an audio.')
 
         return data
