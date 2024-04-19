@@ -92,17 +92,19 @@ class AudioData:
     @property
     def text(self) -> str:
         if not self.__text:
-            cached_result: str = services.cache.get(self.__hexdigest)
+            cached_result: str = services.cache.get_finished(self.__hexdigest)
 
             if cached_result:
                 self.__text = cached_result
 
             else:
+                services.cache.set_started(self.__hexdigest, 'True')
+
                 self.__data = services.converter.convert(self.__data)
                 result: str = services.recognition.recognize(self.__data)
                 self.__text = result
 
-                services.cache.set(self.__hexdigest, self.__text)
+                services.cache.set_finished(self.__hexdigest, self.__text)
 
         return self.__text
 
