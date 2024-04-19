@@ -219,9 +219,19 @@ def test_post_400_malformed_data() -> None:
     assert data == {'base64': ['Malformed base64 data.']}
 
 
-def test_post_400_not_an_audio() -> None:
+def test_post_400_not_an_audio_another_file() -> None:
     file: pathlib.Path = pathlib.Path('tests', 'data', 'base64', 'image.txt')
     payload_: dict = {'base64': open(file, 'r', encoding='utf-8')}
+
+    response: requests.Response = requests.post(URL, payload_)
+    data: dict = response.json()
+
+    assert response.status_code == 400
+    assert data == {'base64': ['Not an audio.']}
+
+
+def test_post_400_not_an_audio_random_characters() -> None:
+    payload_: dict = {'base64': 'aaaa'}
 
     response: requests.Response = requests.post(URL, payload_)
     data: dict = response.json()
