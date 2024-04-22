@@ -28,6 +28,45 @@ OPTIONS: dict = {
 }
 
 
+def test_403() -> None:
+    response: requests.Response = requests.get(WRONG_URL_DETAIL)
+    data: dict = response.json()
+
+    assert response.status_code == 403
+    assert (
+        data.get('detail', '') ==
+        'Authentication credentials were not provided.'
+    )
+
+
+AUTH_URL: str = 'http://localhost:8000/api/token/'
+USERNAME: str = 'admin'
+PASSWORD: str = 'admin'
+
+
+def test_authentication() -> None:
+    response: requests.Response = requests.post(
+        AUTH_URL, {'username': USERNAME, 'password': PASSWORD}
+    )
+
+    data: dict = response.json()
+
+    assert response.status_code == 200
+    assert data.get('access', '')
+    assert data.get('refresh', '')
+
+
+JWT = ''
+
+response: requests.Response = requests.post(
+        AUTH_URL, {'username': USERNAME, 'password': PASSWORD}
+    )
+
+data: dict = response.json()
+JWT = data.get('access', '')
+HEADERS = {'Authorization': f'Bearer {JWT}'}
+
+
 def payload(name: str):
     file: pathlib.Path = pathlib.Path('tests', 'data', 'audio', name)
     payload: dict = {'file': open(file, 'rb')}
@@ -36,14 +75,14 @@ def payload(name: str):
 
 
 def test_get_list_404() -> None:
-    response: requests.Response = requests.get(URL_LIST)
+    response: requests.Response = requests.get(URL_LIST, headers=HEADERS)
 
     assert response.status_code == 404
 
 
 def test_get_detail_200() -> None:
-    requests.post(POST_URL, files=payload('audio.aac'))
-    response: requests.Response = requests.get(URL_DETAIL)
+    requests.post(POST_URL, files=payload('audio.aac'), headers=HEADERS)
+    response: requests.Response = requests.get(URL_DETAIL, headers=HEADERS)
     data: dict = response.json()
 
     assert response.status_code == 200
@@ -52,20 +91,22 @@ def test_get_detail_200() -> None:
 
 
 def test_get_detail_404() -> None:
-    response: requests.Response = requests.get(WRONG_URL_DETAIL)
+    response: requests.Response = requests.get(
+        WRONG_URL_DETAIL, headers=HEADERS
+    )
     assert response.status_code == 404
 
 
 def test_head_detail_200() -> None:
-    requests.post(POST_URL, files=payload('audio.aac'))
-    response: requests.Response = requests.head(URL_DETAIL)
+    requests.post(POST_URL, files=payload('audio.aac'), headers=HEADERS)
+    response: requests.Response = requests.head(URL_DETAIL, headers=HEADERS)
 
     assert response.status_code == 200
 
 
 def test_post_405() -> None:
     response: requests.Response = requests.post(
-        URL_DETAIL,
+        URL_DETAIL, headers=HEADERS
     )
     data: dict = response.json()
 
@@ -74,7 +115,7 @@ def test_post_405() -> None:
 
 
 def test_put_405() -> None:
-    response: requests.Response = requests.put(URL_DETAIL)
+    response: requests.Response = requests.put(URL_DETAIL, headers=HEADERS)
     data: dict = response.json()
 
     assert response.status_code == 405
@@ -82,7 +123,7 @@ def test_put_405() -> None:
 
 
 def test_patch_405() -> None:
-    response: requests.Response = requests.patch(URL_DETAIL)
+    response: requests.Response = requests.patch(URL_DETAIL, headers=HEADERS)
     data: dict = response.json()
 
     assert response.status_code == 405
@@ -90,7 +131,7 @@ def test_patch_405() -> None:
 
 
 def test_delete_405() -> None:
-    response: requests.Response = requests.delete(URL_DETAIL)
+    response: requests.Response = requests.delete(URL_DETAIL, headers=HEADERS)
     data: dict = response.json()
 
     assert response.status_code == 405
@@ -98,7 +139,7 @@ def test_delete_405() -> None:
 
 
 def test_options_200() -> None:
-    response: requests.Response = requests.options(URL_DETAIL)
+    response: requests.Response = requests.options(URL_DETAIL, headers=HEADERS)
     data: dict = response.json()
 
     assert response.status_code == 200
