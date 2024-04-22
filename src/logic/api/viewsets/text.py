@@ -12,7 +12,7 @@ class TextViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
     serializer_class: typing.Type[TextSerializer] = TextSerializer
 
     @extend_schema(
-        responses={201: TextSerializer},
+        responses={200: TextSerializer},
     )
     def retrieve(self, request, *args, **kwargs) -> Response:
         id: str = kwargs['pk']
