@@ -22,10 +22,19 @@ from drf_spectacular.views import (
     SpectacularRedocView as Redoc,
     SpectacularSwaggerView as Swagger
 )
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView as TokenView,
+    TokenRefreshView as TokenRefresh,
+    TokenVerifyView as TokenVerify,
+)
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/token/', TokenView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefresh.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerify.as_view(), name='token_verify'),
+    path("api-auth/", include("rest_framework.urls")),  
     path('api/v1/', include((urlpatterns, 'logic'), namespace='v1')),
     path(
         'api/v1/schema/',
