@@ -3,7 +3,7 @@ import typing
 from django.http import Http404
 from rest_framework import viewsets, mixins
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from logic.api.serializers.text import TextSerializer
 from logic import services
 
@@ -12,7 +12,12 @@ class TextViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
     serializer_class: typing.Type[TextSerializer] = TextSerializer
 
     @extend_schema(
-        responses={201: TextSerializer},
+        responses={200: TextSerializer},
+        parameters=[
+            OpenApiParameter(
+                name="id", type=str, location=OpenApiParameter.PATH
+            )
+        ]
     )
     def retrieve(self, request, *args, **kwargs) -> Response:
         id: str = kwargs['pk']
