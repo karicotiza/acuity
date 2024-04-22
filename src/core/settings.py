@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework_simplejwt',
     'drf_spectacular',
     'drf_spectacular_sidecar',
     'rest_framework',
@@ -137,6 +138,14 @@ REST_FRAMEWORK: dict[str, typing.Any] = {
     'DEFAULT_VERSIONING_CLASS':
         'rest_framework.versioning.NamespaceVersioning',
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.' +
+        'JWTStatelessUserAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 }
 
 SPECTACULAR_SETTINGS = {
