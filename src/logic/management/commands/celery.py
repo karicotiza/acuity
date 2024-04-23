@@ -27,4 +27,7 @@ class Command(BaseCommand):
                     raise ValueError(message)
 
                 else:
-                    system('python -m celery -A core worker')
+                    system(
+                        'python -m celery -A core worker -P threads ' +
+                        '--pidfile=celery.pid'
+                    )
