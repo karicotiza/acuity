@@ -157,6 +157,8 @@ SPECTACULAR_SETTINGS = {
     'REDOC_DIST': 'SIDECAR',
 }
 
+NN_MODEL_PATH = Path('../nn_model')
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/

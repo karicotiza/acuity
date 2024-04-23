@@ -1,4 +1,4 @@
-from pathlib import Path
+from core import settings as __settings
 from logic.services import decoder as __decoder
 from logic.services import converter as __converter
 from logic.services import cache as __cache
@@ -12,5 +12,5 @@ converter: __converter.Convertor = __converter.Convertor()
 cache: __cache.Cache = __cache.Cache()
 
 recognition: __recognition.IRecognitionModel = __recognition.XLSR53(
-    path=Path('..', '..', 'model')
+    path=__settings.NN_MODEL_PATH
 )
