@@ -1,0 +1,95 @@
+name: acuity
+
+services:
+  postgresql:
+    container_name: acuity_postgresql
+    image: postgres:16.2-bookworm
+    env_file:
+      - .env
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "logic"]
+      interval: 5s
+      timeout: 5s
+      start_period: 20s
+
+  redis:
+    container_name: acuity_redis
+    image: redis/redis-stack:7.2.0-v10
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    container_name: acuity_rabbitmq
+    image: rabbitmq:3.13.1-management
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  django:
+    container_name: acuity_django
+    build: 
+      context: "src"
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ${NN_MODEL_PATH}:/nn_model/
+      - uwsgi_data:/tmp/uwsgi/
+      - web_static:/var/www/core/static/
+      - web_media:/var/www/core/media/
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    tty: true
+    healthcheck:
+      test: ["CMD", "ls", "/tmp/uwsgi/"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+
+  nginx:
+    build: 
+      context: "nginx"
+      dockerfile: Dockerfile
+    container_name: acuity_nginx
+    restart: always
+    volumes:
+      - uwsgi_data:/tmp/uwsgi/
+      - web_static:/var/www/core/static/:ro
+      - web_media:/var/www/core/media/:ro
+    env_file:
+      - .env
+    ports:
+      - "8000:80"
+    depends_on:
+      django:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "0.0.0.0:8000/admin/"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+
+volumes:
+  uwsgi_data:
+  web_static:
+  web_media:

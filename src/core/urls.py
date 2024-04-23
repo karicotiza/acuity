@@ -15,7 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.conf.urls.static import static
 from django.urls import path, include
+from core import settings
 from logic.api.urls import urlpatterns
 from drf_spectacular.views import (
     SpectacularAPIView as OpenAPI,
@@ -52,3 +54,6 @@ urlpatterns = [
         name='redoc'
     ),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
