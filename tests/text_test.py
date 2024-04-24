@@ -98,7 +98,6 @@ def test_get_detail_404() -> None:
 
 
 def test_head_detail_200() -> None:
-    requests.post(POST_URL, files=payload('audio.aac'), headers=HEADERS)
     response: requests.Response = requests.head(URL_DETAIL, headers=HEADERS)
 
     assert response.status_code == 200

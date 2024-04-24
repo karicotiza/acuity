@@ -125,7 +125,7 @@ def test_post_caching() -> None:
 
     assert redirect.status_code == 200
 
-    sleep(3)
+    sleep(2)
 
     redirect_: requests.Response = requests.get(link, headers=HEADERS)
     redirect_data: dict = redirect_.json()
