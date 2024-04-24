@@ -11,6 +11,8 @@ class FileSerializer(serializers.Serializer):
     def validate_file(
         self, file: InMemoryUploadedFile
     ) -> InMemoryUploadedFile:
+        too_long: bool = False
+
         try:
             bytes_io: BytesIO | Any = file.file
 
@@ -20,8 +22,16 @@ class FileSerializer(serializers.Serializer):
 
             bytes_io_: BytesIO = BytesIO(bytes_)
 
-            AudioSegment.from_file(bytes_io_)
+            audio = AudioSegment.from_file(bytes_io_)
+
+            if audio.duration_seconds > 30:
+                too_long = True
+
         except Exception:
             raise serializers.ValidationError('Not an audio file.')
+
+        if too_long:
+            message: str = 'The audio should be shorter than 30 seconds.'
+            raise serializers.ValidationError(message)
 
         return file
