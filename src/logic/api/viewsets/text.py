@@ -34,6 +34,7 @@ class TextViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
 
             if text:
                 ready = True
+                services.cache.refresh(audio_hexdigest)
 
             response_data: TextSerializer = TextSerializer(
                 data={'ready': ready, 'text': text}
