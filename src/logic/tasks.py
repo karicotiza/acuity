@@ -10,7 +10,9 @@ def start_recognition(
 ) -> None:
     audio_data: AudioData = AudioData(audio_bytes, audio_bytes_hexdigest)
     audio_data_text: str = audio_data.text
-    text_hexdigest: StringHexdigest = StringHexdigest(audio_data_text)
 
-    new_log: Logs = Logs(ip=ip, hash=text_hexdigest.value)
-    new_log.save()
+    if audio_data_text:
+        text_hexdigest: StringHexdigest = StringHexdigest(audio_data_text)
+
+        new_log: Logs = Logs(ip=ip, hash=text_hexdigest.value)
+        new_log.save()

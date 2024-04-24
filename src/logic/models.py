@@ -92,6 +92,11 @@ class AudioData:
     @property
     def text(self) -> str:
         if not self.__text:
+            started: str = services.cache.get_started(self.__hexdigest)
+
+            if started:
+                return ''
+
             cached_result: str = services.cache.get_finished(self.__hexdigest)
 
             if cached_result:
