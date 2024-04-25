@@ -25,6 +25,12 @@ Steps:
 2. Download [xlsr-53](https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-english/tree/main) and put in `./nn_model` folder
 3. Run `docker compose up --build` in the terminal
 
+# Endpoints
+
+* `api/token/` - JWT
+* `api/v1/schema/swagger/` or `api/v1/schema/redoc/` - Documentation
+* `api/v1/` - DRF browsable API
+
 # Develop
 
 Steps:
