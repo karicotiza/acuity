@@ -81,3 +81,59 @@ Change the values in the `./prod.env` file
 * `DJANGO_SUPERUSER_EMAIL` - Email
 * `DJANGO_SECRET_KEY` - Secret Key
 * `DJANGO_ALLOWED_HOSTS` - Allowed hosts
+
+# Example
+
+``` Python
+from pathlib import Path
+from requests import get, post, Response
+from time import sleep
+
+
+def authenticate(url: str, login: str, password: str) -> dict[str, str]:
+    response: Response = post(
+        url, data={'username': login, 'password': password}
+    )
+
+    data: dict = response.json()
+    jwt: str = data.get('access', '')
+    headers: dict[str, str] = {'Authorization': f'Bearer {jwt}'}
+
+    return headers
+
+
+def recognize(
+    url: str, file: Path, wait: float, headers: dict[str, str],
+) -> str:
+    response: Response = post(
+        url, files={'file': open(file, 'rb')}, headers=headers
+    )
+
+    data: dict = response.json()
+    link_to_recognized_text: str = data.get('link', '')
+
+    while True:
+        redirect: Response = get(link_to_recognized_text, headers=headers)
+        redirect_data: dict = redirect.json()
+        ready: bool = redirect_data.get('ready', False)
+
+        if ready:
+            text: str = redirect_data.get('text', '')
+            return text
+
+        else:
+            sleep(wait)
+
+
+auth_url: str = 'http://localhost:8000/api/token/'
+recognition_url: str = 'http://localhost:8000/api/v1/file/'
+login: str = 'admin'
+password: str = 'admin'
+
+
+headers = authenticate(auth_url, login, password)
+file: Path = Path('tests', 'data', 'audio', 'audio.wav')
+recognized_text: str = recognize(recognition_url, file, 0.2, headers)
+
+print(recognized_text)
+```
