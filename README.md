@@ -74,3 +74,4 @@ Change the values in the `./prod.env` file
 * `DJANGO_SUPERUSER_PASSWORD` - Password
 * `DJANGO_SUPERUSER_EMAIL` - Email
 * `DJANGO_SECRET_KEY` - Secret Key
+* `DJANGO_ALLOWED_HOSTS` - Allowed hosts
