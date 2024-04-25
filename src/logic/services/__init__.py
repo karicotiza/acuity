@@ -1,4 +1,5 @@
-from core import settings as __settings
+from pathlib import Path as __Path
+from core.settings import NN_SETTINGS as __NN_SETTINGS
 from logic.services import decoder as __decoder
 from logic.services import converter as __converter
 from logic.services import cache as __cache
@@ -7,10 +8,32 @@ from logic.services import recognition as __recognition
 
 decoder: __decoder.Decoder = __decoder.Decoder()
 
-converter: __converter.Convertor = __converter.Convertor()
+if isinstance(__NN_SETTINGS['CONVERTER_FORMAT'], str):
+    __format: str = __NN_SETTINGS['CONVERTER_FORMAT']
+
+if isinstance(__NN_SETTINGS['CONVERTER_BITRATE'], str):
+    __bitrate: str = __NN_SETTINGS['CONVERTER_BITRATE']
+
+if isinstance(__NN_SETTINGS['CONVERTER_MONO'], bool):
+    __mono: bool = __NN_SETTINGS['CONVERTER_MONO']
+
+converter: __converter.Convertor = __converter.Convertor(
+    format=__format,
+    bitrate=__bitrate,
+    mono=__mono,
+)
+
 
 cache: __cache.Cache = __cache.Cache()
 
+
+if isinstance(__NN_SETTINGS['MODEL_PATH'], __Path):
+    __path: __Path = __NN_SETTINGS['MODEL_PATH']
+
+if isinstance(__NN_SETTINGS['SAMPLE_RATE'], int):
+    __sample_rate: int = __NN_SETTINGS['SAMPLE_RATE']
+
 recognition: __recognition.IRecognitionModel = __recognition.XLSR53(
-    path=__settings.NN_MODEL_PATH
+    path=__path,
+    sample_rate=__sample_rate,
 )

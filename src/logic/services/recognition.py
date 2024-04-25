@@ -28,7 +28,7 @@ class XLSR53(IRecognitionModel):
         'wav2vec2-large-xlsr-53-english/tree/main'
     )
 
-    def __init__(self, path: Path, sample_rate: int = 16_000) -> None:
+    def __init__(self, path: Path, sample_rate: int) -> None:
         self.__path = path
 
         self.__validate()

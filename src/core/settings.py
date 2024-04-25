@@ -10,10 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-import typing
-
 from os import environ
 from pathlib import Path
+from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,9 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (
-    'django-insecure-#v(m^kz9v5t0n3e28o0hu*#6y(35rtks&h8k!kxuu92h7d7kua'
-)
+SECRET_KEY = environ.get('DJANGO_SECRET_KEY', get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -134,7 +131,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-REST_FRAMEWORK: dict[str, typing.Any] = {
+REST_FRAMEWORK = {
     'DEFAULT_VERSIONING_CLASS':
         'rest_framework.versioning.NamespaceVersioning',
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
@@ -157,7 +154,14 @@ SPECTACULAR_SETTINGS = {
     'REDOC_DIST': 'SIDECAR',
 }
 
-NN_MODEL_PATH = Path('../nn_model')
+NN_SETTINGS = {
+    'CONVERTER_FORMAT': str(environ.get('NN_CONVERTER_FORMAT', 'mp3')),
+    'CONVERTER_BITRATE': str(environ.get('NN_CONVERTER_BITRATE', '48k')),
+    'CONVERTER_MONO': bool(environ.get('NN_CONVERTER_MONO', True)),
+    'MODEL_PATH': Path(environ.get('NN_MODEL_PATH', '../nn_model')),
+    'MAX_LENGTH': int(environ.get('NN_MAX_LENGTH', 30)),
+    'SAMPLE_RATE': int(environ.get('NN_SAMPLE_RATE', 16000)),
+}
 
 
 # Internationalization

@@ -4,12 +4,7 @@ from pydub import AudioSegment  # type: ignore
 
 class Convertor:
 
-    def __init__(
-        self,
-        format: str = 'mp3',
-        bitrate: str = '48k',
-        mono: bool = True,
-    ) -> None:
+    def __init__(self, format: str, bitrate: str, mono: bool) -> None:
         self.__format: str = format
         self.__bitrate: str = bitrate
         self.__mono: bool = mono

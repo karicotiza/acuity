@@ -2,6 +2,7 @@ from io import BytesIO
 from typing import Any
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework import serializers
+from core.settings import NN_SETTINGS
 from pydub import AudioSegment  # type: ignore
 
 
@@ -24,14 +25,17 @@ class FileSerializer(serializers.Serializer):
 
             audio = AudioSegment.from_file(bytes_io_)
 
-            if audio.duration_seconds > 30:
+            if audio.duration_seconds > NN_SETTINGS['MAX_LENGTH']:
                 too_long = True
 
         except Exception:
             raise serializers.ValidationError('Not an audio file.')
 
         if too_long:
-            message: str = 'The audio should be shorter than 30 seconds.'
+            message: str = (
+                'The audio should be shorter than ' +
+                f'{NN_SETTINGS["MAX_LENGTH"]} seconds.'
+            )
             raise serializers.ValidationError(message)
 
         return file
