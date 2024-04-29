@@ -1,12 +1,12 @@
-import torch
 import librosa
+import torch
 
 from io import BytesIO
+from numpy import ndarray
 from pathlib import Path
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor  # type: ignore
 from transformers.feature_extraction_utils import BatchFeature  # type: ignore
 from transformers.modeling_outputs import CausalLMOutput  # type: ignore
-from numpy import ndarray
 
 
 class IRecognitionModel:
@@ -53,10 +53,14 @@ class XLSR53(IRecognitionModel):
                 missing_necessary_files.append(file_)
 
         if missing_necessary_files:
-            message: str = (
-                f'Missing files: {str(missing_necessary_files)}, ' +
-                f'get them at {self.__link}'
-            )
+            memory: list[str] = [
+                'Missing files:',
+                str(missing_necessary_files),
+                'get them at',
+                self.__link
+            ]
+
+            message: str = ' '.join(memory)
 
             raise ValueError(message)
 
@@ -66,13 +70,13 @@ class XLSR53(IRecognitionModel):
         inputs: BatchFeature = self.__processor(
             numpy_array,
             sampling_rate=self.__sample_rate,
-            return_tensors="pt",
-            padding=True
+            return_tensors='pt',
+            padding=True,
         )
 
         with torch.no_grad():
             outputs: CausalLMOutput = self.__model(
-                inputs.input_values, attention_mask=inputs.attention_mask
+                inputs.input_values, attention_mask=inputs.attention_mask,
             )
 
             logits: torch.Tensor = outputs.logits
