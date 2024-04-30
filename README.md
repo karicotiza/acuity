@@ -18,12 +18,21 @@ A simple and reliable REST API service for audio recognition
 
 🛡️ `DOS` protected
 
+🏎️ `GPU` accelerated
+
 # Run
 
 Steps:
 1. Make sure you have [docker](https://www.docker.com/) installed
 2. Download [xlsr-53](https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-english/tree/main) and put in `./nn_model` folder
 3. Run `docker compose up --build` in the terminal
+
+# GPU acceleration
+
+Steps:
+1. Make sure that the nvidia graphics card is physically installed on your
+device
+2. Run `docker compose -f .\docker-compose-gpu.yml up --build`
 
 # Endpoints
 
