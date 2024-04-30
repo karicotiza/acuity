@@ -41,10 +41,10 @@ services:
       - "5672:5672"
 
   django:
-    container_name: acuity_django_cpu
+    container_name: acuity_django_gpu
     build: 
       context: "src"
-      dockerfile: Dockerfile
+      dockerfile: DockerfileGPU
     env_file:
       - prod.env
     volumes:
@@ -60,6 +60,13 @@ services:
       rabbitmq:
         condition: service_healthy
     tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     healthcheck:
       test: ["CMD", "ls", "/tmp/uwsgi/"]
       interval: 5s

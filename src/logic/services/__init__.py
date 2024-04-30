@@ -1,4 +1,5 @@
 from pathlib import Path as __Path
+from torch import cuda as __cuda
 from core.settings import NN_SETTINGS as __NN_SETTINGS
 from logic.services import decoder as __decoder
 from logic.services import converter as __converter
@@ -33,7 +34,14 @@ if isinstance(__NN_SETTINGS['MODEL_PATH'], __Path):
 if isinstance(__NN_SETTINGS['SAMPLE_RATE'], int):
     __sample_rate: int = __NN_SETTINGS['SAMPLE_RATE']
 
-recognition: __recognition.IRecognitionModel = __recognition.XLSR53(
-    path=__path,
-    sample_rate=__sample_rate,
-)
+if __cuda.is_available():
+    recognition: __recognition.IRecognitionModel = __recognition.XLSR53_GPU(
+        path=__path,
+        sample_rate=__sample_rate,
+    )
+
+else:
+    recognition: __recognition.IRecognitionModel = __recognition.XLSR53_CPU(
+        path=__path,
+        sample_rate=__sample_rate,
+    )
